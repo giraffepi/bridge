@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Loading...</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      color: #ffffff;
+      text-align: center;
+    }
+
+    .gif-wrap {
+      margin-bottom: 32px;
+    }
+    .gif-wrap img {
+      width: 200px;
+      height: 200px;
+      object-fit: contain;
+    }
+
+    .message {
+      font-size: 18px;
+      letter-spacing: 0.03em;
+      line-height: 1.6;
+      padding: 0 24px;
+      opacity: 0;
+      animation: fadeIn 0.5s ease forwards 0.2s;
+    }
+
+    .dot-ani::after {
+      content: '';
+      animation: dots 1.2s steps(3, end) infinite;
+    }
+    @keyframes dots {
+      0%   { content: ''; }
+      33%  { content: '.'; }
+      66%  { content: '..'; }
+      100% { content: '...'; }
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+    🖼  로딩 이미지
+    ✏️  수정: "loading.gif" 를 본인 파일명으로 변경
+    📌  이미지 파일은 index.html 과 같은 폴더에 있어야 함
+  ============================================================ -->
+  <div class="gif-wrap">
+    <img src="loading.gif" alt="loading" />
+  </div>
+
+  <p class="message" id="msg">
+    <span class="dot-ani"></span>
+  </p>
+
+
+  <script>
+
+  /* ============================================================
+     ✅ [수정 1] 국가별 URL + 텍스트
+     ----------------------------------------------------------
+     ✏️  URL 구조:
+         한국          → https://aalok.com/
+         미국          → https://www.aalokstore.com/
+         그 외 전체    → https://en.aalok.com/
+
+     ✏️  text 문장만 변경 가능 (선택사항)
+     📌  목록에 없는 국가는 자동으로 [수정 2] 글로벌로 이동
+  ============================================================ */
+  var REDIRECT = {
+
+    // ================================================================
+    // 🌏 아시아
+    // ================================================================
+
+    'KR': {                                         // 한국
+      url:  'https://aalok.com/',
+      text: '잠시 후 한국 스토어로 이동합니다.'
+    },
+    'JP': {                                         // 일본
+      url:  'https://en.aalok.com/',
+      text: '日本のストアへ移動しています。'
+    },
+    'CN': {                                         // 중국
+      url:  'https://en.aalok.com/',
+      text: '正在跳转到商店，请稍候。'
+    },
+    'TW': {                                         // 대만
+      url:  'https://en.aalok.com/',
+      text: '正在跳轉到商店，請稍候。'
+    },
+    'HK': {                                         // 홍콩
+      url:  'https://en.aalok.com/',
+      text: '正在跳轉到商店，請稍候。'
+    },
+    'IN': {                                         // 인도
+      url:  'https://en.aalok.com/',
+      text: 'आपको हमारे स्टोर पर भेजा जा रहा है।'
+    },
+
+    // ================================================================
+    // 🌏 동남아시아
+    // ================================================================
+
+    'SG': {                                         // 싱가포르
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+    'MY': {                                         // 말레이시아
+      url:  'https://en.aalok.com/',
+      text: 'Mengalihkan anda ke kedai kami.'
+    },
+    'TH': {                                         // 태국
+      url:  'https://en.aalok.com/',
+      text: 'กำลังพาคุณไปยังร้านค้าของเรา'
+    },
+    'ID': {                                         // 인도네시아
+      url:  'https://en.aalok.com/',
+      text: 'Mengarahkan Anda ke toko kami.'
+    },
+    'VN': {                                         // 베트남
+      url:  'https://en.aalok.com/',
+      text: 'Đang chuyển hướng đến cửa hàng của chúng tôi.'
+    },
+    'PH': {                                         // 필리핀
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+
+    // ================================================================
+    // 🌎 북미 / 중남미
+    // ================================================================
+
+    'US': {                                         // 미국
+      url:  'https://www.aalokstore.com/',
+      text: 'Redirecting you to our US store.'
+    },
+    'CA': {                                         // 캐나다
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+    'MX': {                                         // 멕시코
+      url:  'https://en.aalok.com/',
+      text: 'Redirigiendo a la tienda.'
+    },
+
+    // ================================================================
+    // 🌍 오세아니아
+    // ================================================================
+
+    'AU': {                                         // 호주
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+    'NZ': {                                         // 뉴질랜드
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+
+    // ================================================================
+    // 🌍 유럽 — 영어권
+    // ================================================================
+
+    'GB': {                                         // 영국
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+    'IE': {                                         // 아일랜드
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+
+    // ================================================================
+    // 🌍 유럽 — 서유럽
+    // ================================================================
+
+    'DE': {                                         // 독일
+      url:  'https://en.aalok.com/',
+      text: 'Sie werden zu unserem Shop weitergeleitet.'
+    },
+    'FR': {                                         // 프랑스
+      url:  'https://en.aalok.com/',
+      text: 'Redirection vers notre boutique.'
+    },
+    'IT': {                                         // 이탈리아
+      url:  'https://en.aalok.com/',
+      text: 'Reindirizzamento al negozio.'
+    },
+    'ES': {                                         // 스페인
+      url:  'https://en.aalok.com/',
+      text: 'Redirigiendo a la tienda.'
+    },
+    'PT': {                                         // 포르투갈
+      url:  'https://en.aalok.com/',
+      text: 'Redirecionando para a loja.'
+    },
+    'NL': {                                         // 네덜란드
+      url:  'https://en.aalok.com/',
+      text: 'U wordt doorgestuurd naar onze winkel.'
+    },
+    'BE': {                                         // 벨기에
+      url:  'https://en.aalok.com/',
+      text: 'Redirection vers notre boutique.'
+    },
+    'AT': {                                         // 오스트리아
+      url:  'https://en.aalok.com/',
+      text: 'Sie werden zu unserem Shop weitergeleitet.'
+    },
+    'CH': {                                         // 스위스
+      url:  'https://en.aalok.com/',
+      text: 'Sie werden zu unserem Shop weitergeleitet.'
+    },
+    'LU': {                                         // 룩셈부르크
+      url:  'https://en.aalok.com/',
+      text: 'Redirection vers notre boutique.'
+    },
+
+    // ================================================================
+    // 🌍 유럽 — 북유럽
+    // ================================================================
+
+    'SE': {                                         // 스웨덴
+      url:  'https://en.aalok.com/',
+      text: 'Omdirigerar dig till vår butik.'
+    },
+    'NO': {                                         // 노르웨이
+      url:  'https://en.aalok.com/',
+      text: 'Omdirigerer deg til vår butikk.'
+    },
+    'DK': {                                         // 덴마크
+      url:  'https://en.aalok.com/',
+      text: 'Omdirigerer dig til vores butik.'
+    },
+    'FI': {                                         // 핀란드
+      url:  'https://en.aalok.com/',
+      text: 'Sinut ohjataan kauppaamme.'
+    },
+    'IS': {                                         // 아이슬란드
+      url:  'https://en.aalok.com/',
+      text: 'Redirecting you to our store.'
+    },
+
+    // ================================================================
+    // 🌍 유럽 — 동유럽
+    // ================================================================
+
+    'PL': {                                         // 폴란드
+      url:  'https://en.aalok.com/',
+      text: 'Przekierowujemy Cię do naszego sklepu.'
+    },
+    'CZ': {                                         // 체코
+      url:  'https://en.aalok.com/',
+      text: 'Přesměrování do našeho obchodu.'
+    },
+    'SK': {                                         // 슬로바키아
+      url:  'https://en.aalok.com/',
+      text: 'Presmerovanie do nášho obchodu.'
+    },
+    'HU': {                                         // 헝가리
+      url:  'https://en.aalok.com/',
+      text: 'Átirányítás az üzletünkbe.'
+    },
+    'RO': {                                         // 루마니아
+      url:  'https://en.aalok.com/',
+      text: 'Redirecționare către magazinul nostru.'
+    },
+    'BG': {                                         // 불가리아
+      url:  'https://en.aalok.com/',
+      text: 'Пренасочване към нашия магазин.'
+    },
+    'HR': {                                         // 크로아티아
+      url:  'https://en.aalok.com/',
+      text: 'Preusmjeravanje na našu trgovinu.'
+    },
+    'SI': {                                         // 슬로베니아
+      url:  'https://en.aalok.com/',
+      text: 'Preusmeritev v našo trgovino.'
+    },
+    'GR': {                                         // 그리스
+      url:  'https://en.aalok.com/',
+      text: 'Ανακατεύθυνση στο κατάστημά μας.'
+    },
+
+  };
+
+
+  /* ============================================================
+     ✅ [수정 2] 글로벌 사이트 (목록에 없는 모든 국가 + 예외 상황)
+     ----------------------------------------------------------
+     📌  현재 설정: https://en.aalok.com/
+     📌  아래 모든 예외 상황에서도 이 URL 로 이동함:
+         - 목록에 없는 국가
+         - IP API 한도 초과 (하루 60,000회 초과시)
+         - IP API 오류 / 응답 없음
+         - 4초 안에 응답 없을 때
+  ============================================================ */
+  var GLOBAL = {
+    url:  'https://en.aalok.com/',
+    text: 'Redirecting you to our global store.'
+  };
+
+
+  /* ============================================================
+     ⬇️  여기서부터는 수정하지 않아도 됩니다
+  ============================================================ */
+
+  var msgEl  = document.getElementById('msg');
+  var isDone = false;
+
+  // 안전망: 4초 안에 응답 없으면 글로벌로 강제 이동
+  var safeTimer = setTimeout(function() {
+    if (!isDone) go(GLOBAL);
+  }, 4000);
+
+  // STEP 1 ── IP API 로 국가 판단
+  // freeipapi.com | 무료 | 가입불필요 | 하루 60,000회
+  fetch('https://freeipapi.com/api/json')
+    .then(function(res) {
+      if (!res.ok) {
+        console.warn('[IP API] HTTP error:', res.status);
+        go(GLOBAL);
+        return null;
+      }
+      return res.json();
+    })
+    .then(function(data) {
+      if (!data) return;
+
+      var cc = data.countryCode;
+
+      // 한도 초과 또는 빈 응답
+      if (!cc || cc.length !== 2) {
+        console.warn('[IP API] 한도 초과 또는 빈 응답. 글로벌로 이동.');
+        go(GLOBAL);
+        return;
+      }
+
+      // STEP 2 ── 국가 매핑 찾기
+      var target = REDIRECT[cc];
+      go(target || GLOBAL);
+    })
+    .catch(function(err) {
+      console.warn('[IP API] 네트워크 에러:', err);
+      go(GLOBAL);
+    });
+
+  // 텍스트 출력 후 즉시 리다이렉트
+  function go(target) {
+    if (isDone) return;
+    isDone = true;
+    clearTimeout(safeTimer);
+    msgEl.innerHTML = target.text;
+    setTimeout(function() {
+      window.location.href = target.url;
+    }, 300);
+  }
+
+  </script>
+
+</body>
+</html>
