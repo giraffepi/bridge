@@ -328,7 +328,7 @@
 
   // STEP 1 ── IP API 로 국가 판단
   // freeipapi.com | 무료 | 가입불필요 | 하루 60,000회
-  fetch('https://ipapi.co/json/')
+  fetch('https://ipwho.is/')
     .then(function(res) {
       if (!res.ok) {
         console.warn('[IP API] HTTP error:', res.status);
